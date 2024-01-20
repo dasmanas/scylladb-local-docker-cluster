@@ -15,6 +15,6 @@ I/O (AIO) requests allowed system-wide (i.e. `fs.aio-max-nr = 1048576`). This is
 - List of exposed ports are
   - 9042 - to connect using `cqlsh`
 - Install `cqlsh` in your local machine
+- Scylla Manager API URL - http://localhost:5080/ui/
 
-
-Scylla Manager API URL - http://localhost:5080/ui/
+Tested on  MacOS M1, M2 and M3
