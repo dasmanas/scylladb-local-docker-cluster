@@ -9,8 +9,12 @@ compose.
 
 ## Important Notes
 - A custom [sysctl.conf](etc%2Fsysctl.conf) file has been provided from outside to increase the number of asynchronous
-I/O (AIO) requests allowed system-wide. This is applied through `sysctl`. Running the service container in
-`--privileged` mode will allow to make those changes using `sysctl -p`.
+I/O (AIO) requests allowed system-wide (i.e. `fs.aio-max-nr = 1048576`). This is applied through `sysctl`. Running the service container in
+`--privileged` mode will allow to make those changes using `sysctl -p`. The updated value can be verified using from 
+`cat /proc/sys/fs/aio-max-nr`
 - List of exposed ports are
   - 9042 - to connect using `cqlsh`
 - Install `cqlsh` in your local machine
+
+
+Scylla Manager API URL - http://localhost:5080/ui/

@@ -6,25 +6,20 @@ networks:
     name: dbnet
 services:
   scylla1:
-    #build:
-    #  context: .
-    #  dockerfile: Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile-scylladb-with-manager-agent
     #image: scylladb/scylla-with-agent
-    image: scylladb/scylla
-    platform: linux/arm64/v8
+#    image: scylladb/scylla
+#    platform: linux/arm64/v8
     privileged: true
-    #sysctls:
-    #  - fs.aio-max-nr=1048576
     container_name: scylla1
     environment:
       - CLUSTER_NAME=scylla-docker
-    command: --overprovisioned 1 --smp 1 --memory 750M
-    #command:
-    #  - /bin/sh -c "sysctl -p /etc/sysctl.conf"
-    #  - --overprovisioned 1 --smp 1 --memory 750M
+#    command: --overprovisioned 1 --smp 1 --memory 750M
+    entrypoint: "/custom-docker-entrypoint.sh --overprovisioned 1 --smp 1 --memory 750M"
     volumes:
       - ./etc/sysctl.conf:/etc/sysctl.conf
-      #- ./proc/sys/fs/aio-max-nr:/proc/sys/fs/aio-max-nr
       - scylla_data_1:/var/lib/scylla
     ports:
       - "9042:9042"
@@ -37,28 +32,23 @@ services:
       timeout: 5s
       retries: 10
   scylla2:
-    #build:
-    #  context: .
-    #  dockerfile: Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile-scylladb-with-manager-agent
     #image: scylladb/scylla-with-agent
-    image: scylladb/scylla
-    platform: linux/arm64/v8
+#    image: scylladb/scylla
+#    platform: linux/arm64/v8
     privileged: true
-    #sysctls:
-    #  - fs.aio-max-nr=1048576
     container_name: scylla2
     environment:
       - CLUSTER_NAME=scylla-docker
     depends_on:
       scylla1:
         condition: service_healthy
-    command: --seeds=scylla1 --overprovisioned 1 --smp 1 --memory 750M
-    #command:
-    #  - /bin/sh -c "sysctl -p /etc/sysctl.conf"
-    #  - --seeds=scylla1 --overprovisioned 1 --smp 1 --memory 750M
+#    command: --seeds=scylla1 --overprovisioned 1 --smp 1 --memory 750M
+    entrypoint: "/custom-docker-entrypoint.sh --seeds=scylla1 --overprovisioned 1 --smp 1 --memory 750M"
     volumes:
       - ./etc/sysctl.conf:/etc/sysctl.conf
-      #- ./proc/sys/fs/aio-max-nr:/proc/sys/fs/aio-max-nr
       - scylla_data_2:/var/lib/scylla
     ports:
       - "9043:9042"
@@ -71,25 +61,21 @@ services:
       timeout: 5s
       retries: 10
   scylla3:
-    #build:
-    #  context: .
-    #  dockerfile: Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile-scylladb-with-manager-agent
     #image: scylladb/scylla-with-agent
-    image: scylladb/scylla
-    platform: linux/arm64/v8
+#    image: scylladb/scylla
+#    platform: linux/arm64/v8
     privileged: true
-    #sysctls:
-    #  - fs.aio-max-nr=1048576
     container_name: scylla3
     environment:
       - CLUSTER_NAME=scylla-docker
     depends_on:
       scylla2:
         condition: service_healthy
-    command: --seeds=scylla1 --overprovisioned 1 --smp 1 --memory 750M
-    #command:
-    #  - /bin/sh -c "sysctl -p /etc/sysctl.conf"
-    #  - --seeds=scylla1 --overprovisioned 1 --smp 1 --memory 750M
+#    command: --seeds=scylla1 --overprovisioned 1 --smp 1 --memory 750M
+    entrypoint: "/custom-docker-entrypoint.sh --seeds=scylla1 --overprovisioned 1 --smp 1 --memory 750M"
     volumes:
       - ./etc/sysctl.conf:/etc/sysctl.conf
       #- ./proc/sys/fs/aio-max-nr:/proc/sys/fs/aio-max-nr
@@ -104,45 +90,49 @@ services:
       interval: 30s
       timeout: 5s
       retries: 10
-#  scylla-manager-db:
-#    image: scylladb/scylla
-#    platform: linux/arm64/v8
-#    privileged: true
-#    container_name: scylla-manager-db
-#    command: --overprovisioned 1 --smp 1 --memory 500M
-#    volumes:
-#      - ./etc/sysctl.conf:/etc/sysctl.conf
-#      - scylla_manager_db_data:/var/lib/scylla
-#    networks:
-#      - dbnet
-#    healthcheck:
-#      test: [ "CMD-SHELL", "[ $$(nodetool status | awk 'FNR==6 {print $1}') = UN ]" ]
-#      interval: 30s
-#      timeout: 5s
-#      retries: 10
-#  scylla-manager:
-#    image: scylladb/scylla-manager:3.2.4
-#    platform: linux/arm64/v8
-#    container_name: scylla-manager
-#    networks:
-#      - dbnet
-#    ports:
-#      - "5080:5080"
-#    depends_on:
-#      scylla-manager-db:
-#        condition: service_healthy
-#  minio:
-#    image: minio/minio
-#    volumes:
-#      - minio_data:/data
-#    networks:
-#      - dbnet
-#    ports:
-#      - "9001:9000"
-#    environment:
-#      MINIO_ACCESS_KEY: minio
-#      MINIO_SECRET_KEY: minio123
-#    command: server /data
+  scylla-manager-db:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    #image: scylladb/scylla
+    #platform: linux/arm64/v8
+    privileged: true
+    container_name: scylla-manager-db
+    #command: --overprovisioned 1 --smp 1 --memory 500M
+    entrypoint: "/custom-docker-entrypoint.sh --overprovisioned 1 --smp 1 --memory 500M"
+    volumes:
+      - ./etc/sysctl.conf:/etc/sysctl.conf
+      - scylla_manager_db_data:/var/lib/scylla
+    networks:
+      - dbnet
+    healthcheck:
+      test: [ "CMD-SHELL", "[ $$(nodetool status | awk 'FNR==6 {print $1}') = UN ]" ]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+  scylla-manager:
+    image: scylladb/scylla-manager:3.2.4
+    platform: linux/arm64/v8
+    container_name: scylla-manager
+    networks:
+      - dbnet
+    ports:
+      - "5080:5080"
+    depends_on:
+      scylla-manager-db:
+        condition: service_healthy
+  minio:
+    image: minio/minio
+    volumes:
+      - minio_data:/data
+    networks:
+      - dbnet
+    ports:
+      - "9001:9000"
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    command: server /data
 volumes:
   minio_data:
   scylla_data_1:
